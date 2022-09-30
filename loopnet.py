@@ -1,24 +1,12 @@
 from bs4 import BeautifulSoup
-import pandas as pd
 import requests
 import json
 import argparse
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--Url=', dest='Url', type=str, help='Add Url')
-parser.add_argument('--Path=', dest='Path', type=str, help='Add Path')
-args = parser.parse_args()
-
-print (args.Url)
-print(args.Path)
-
-
 headers = {
 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36',
 }
-
-
 
 
 class App:
@@ -29,10 +17,10 @@ class App:
     area = []
     built_in =  []
     unit = []
-    def __init__(self):
+    def __init__(self, url, path):
 
 
-        all_url = [args.Url]
+        all_url = [url]
 
 
   
@@ -47,11 +35,8 @@ class App:
             except:
                 pass
 
-
-        Data = pd.DataFrame(self.listes)
-        Data.to_excel(f'{args.Path}/Final_Output.xlsx' ,index=None)
-        Data.to_json(f'{args.Path}/Final_Output.json', orient='records', lines=True)
-        Data.to_csv(f'{args.Path}/Final_Output.csv' ,index=None)
+        with open(f'{path}/Final_Output.json', "w") as outfile:
+            json.dump(self.listes, outfile, indent=4)
         print("Complete Now Thanks You")
 
 
@@ -74,7 +59,6 @@ class App:
         try:
             req =requests.get(url,headers=headers,timeout=10)
             makesoup = BeautifulSoup(req.text,"lxml")
-            print(req.status_code)        
             try:
                 for add in makesoup.findAll("div",{"class":"header-col"}):
                     self.address.append(add.text.replace('\n',"").replace('\r',"").strip())
@@ -138,5 +122,10 @@ class App:
 
 
 if __name__ == '__main__':
-    app = App()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--Url=', dest='Url', type=str, help='Add Url')
+    parser.add_argument('--Path=', dest='Path', type=str, help='Add Path')
+    args = parser.parse_args()
+
+    app = App(args.Url, args.Path)
 
